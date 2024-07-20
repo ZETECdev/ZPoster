@@ -1,6 +1,5 @@
 from instagrapi import Client as IGClient
-from tweepy import Client
-from tweepy import API, OAuthHandler
+from tweepy import API, OAuthHandler, Client
 from telebot.async_telebot import AsyncTeleBot
 from telebot.types import InlineKeyboardButton, InlineKeyboardMarkup
 from PIL.Image import new, open
@@ -14,20 +13,20 @@ path = dirname(abspath(__file__))
 
 class ZPoster:
     class Telegram:
-        def __init__(self, tg_token: str, chat: int, thread=None):
+        def __init__(self, tg_token: str, chat: int, thread: None|int=None):
             self.tg = AsyncTeleBot(tg_token, 'HTML')
             self.chat = chat
             self.thread = thread
 
-        async def msg(self, text: str, picture=None, buttons=None):
+        async def msg(self, text: str, picture: None|str=None, buttons=None):
             if picture:
-                await self.tg.send_photo(self.chat, open(picture, 'rb'), text,
+                await self.tg.send_photo(self.chat, picture, text,
                     message_thread_id=self.thread, reply_markup=buttons)
             else:
                 await self.tg.send_message(self.chat, text,
                     message_thread_id=self.thread, reply_markup=buttons)
 
-        async def one_button(self, text, callback_data: str, url=None):
+        async def one_button(self, text, callback_data: str, url:None|str=None):
             return InlineKeyboardMarkup().add(InlineKeyboardButton(text, url, callback_data=callback_data))
 
 
@@ -36,10 +35,10 @@ class ZPoster:
             self.x = Client(x_login[0], x_login[1], x_login[2], x_login[3], x_login[4])
             self.x_api = API(OAuthHandler(x_login[1], x_login[2], x_login[3], x_login[4]))
 
-        def post(self, text: str, media=None):
+        def post(self, text: str, media: None|list=None):
             if media:
                 media_ids = []
-                [media_ids.append(self.x_api.media_upload(file).media_id) for file in media]
+                [media_ids.append(self.x_api.media_upload(file).media_id) for file in media]       
             self.x.create_tweet(text=text, media_ids=media_ids if media else None)
 
     class Instagram:
@@ -79,5 +78,5 @@ class ZPoster:
                 line_width, line_height = font.getbbox(line)[2]-font.getbbox(line)[0], font.getbbox(line)[3]-font.getbbox(line)[1]
                 draw.text((x + (max_width - line_width) / 2, y), text=line, font=font, fill='white')
                 y += line_height
-            image.save('/Data/texttoimage.jpg')
+            image.save(path + '/Data/texttoimage.jpg')
             return path + '/Data/texttoimage.jpg'
